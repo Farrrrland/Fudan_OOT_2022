@@ -1,9 +1,11 @@
+#ifndef _DRAW_HPP_
+#define _DRAW_HPP_
+
 #include <fstream>
 #include <iostream>
 #include "canvas.h"
-#include "draw.h"
 #include "command.h"
-#include "parser.h"
+#include "parser.hpp"
 #include "invoker.h"
 
 void run(int argc, char** argv) {
@@ -39,3 +41,5 @@ void run(int argc, char** argv) {
     CommandInvoker invoker(canvas);
     invoker.Execute(cmds);
 }
+
+#endif

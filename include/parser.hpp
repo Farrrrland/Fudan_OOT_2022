@@ -1,9 +1,22 @@
+#ifndef _PARSER_HPP_
+#define _PARSER_HPP_
+
 #include <map>
 #include <algorithm>
 #include "command.h"
-#include "parser.h"
 
 #include <iostream>
+
+class CommandParser {
+public:
+    std::vector<std::shared_ptr<Command>> ParseCommands(std::shared_ptr<Canvas> canvas, std::string& str);
+private:
+    void RegisterMacroCommand(std::string& cmd, std::shared_ptr<Canvas> canvas);
+    std::shared_ptr<Command> GetCommand(std::string& cmd, std::shared_ptr<Canvas> canvas);
+    std::shared_ptr<Command> GetMacroCommand(std::string& cmd, const Coordinate& offset);
+    std::map<std::string, std::shared_ptr<MacroCommand>> _macro_table;
+};
+
 
 std::vector<std::string> SplitCommand(const std::string& cmd) {
     std::vector<std::string> cmds;
@@ -60,7 +73,6 @@ std::vector<std::string> TrimCommand(const std::string& cmd) {
 std::vector<std::shared_ptr<Command>> CommandParser::ParseCommands(std::shared_ptr<Canvas> canvas, std::string& str) {
     std::vector<std::shared_ptr<Command>> res;
 
-    // Remove whitespaces
     str.erase(remove_if(str.begin(), str.end(), ::isspace), str.end());
 
     std::vector<std::string> cmds = SplitCommand(str);
@@ -119,3 +131,5 @@ std::shared_ptr<Command> CommandParser::GetCommand(std::string& cmd, std::shared
         return GetMacroCommand(tokens[0], p);
     }
 }
+
+#endif

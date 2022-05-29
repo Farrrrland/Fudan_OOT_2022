@@ -1,6 +1,6 @@
 #include <iostream>
 #include "command.h"
-#include "char_lib.h"
+#include "charshape.hpp"
 #include "invoker.h"
 
 //Command

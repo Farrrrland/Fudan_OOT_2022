@@ -1,4 +1,4 @@
-#include "draw.h"
+#include "draw.hpp"
 
 int main(int argc, char** argv) {
     run(argc, argv);
