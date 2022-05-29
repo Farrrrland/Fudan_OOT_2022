@@ -21,6 +21,7 @@ enum CommandTypeEnum {
     REDO
 };
 
+
 class Command {
 public:
     virtual void Execute() {};
@@ -56,18 +57,21 @@ public:
 protected:
     CommandTypeEnum _type;
     bool _executed = false;
-    bool _undoable = true;
+    bool _couldUndo = true;
     std::string _info;
     std::shared_ptr<Canvas> _canvas;
     std::shared_ptr<Canvas> _previousCanvas;
 };
+
 
 class MacroCommand : public Command {
 public:
     virtual void Execute() override;
     virtual void Execute(Coordinate) override;
     virtual void SetExecuted(bool executed) override;
-    std::string GetName() { return _name; }
+    std::string GetName() { 
+        return _name; 
+    }
     MacroCommand(std::shared_ptr<Canvas> canvas, const std::string& name, const Coordinate& offset, std::vector<std::shared_ptr<Command>>& commands);
     static std::shared_ptr<MacroCommand> New(std::shared_ptr<Canvas> canvas, const std::string& name, const Coordinate& offset, std::vector<std::shared_ptr<Command>>& commands);
     std::shared_ptr<Command> Copy() override;
@@ -79,16 +83,18 @@ private:
     std::string _name;
 };
 
+
 class ColorCommand : public Command {
 public:
     virtual void Execute() override;
-    ColorCommand(std::shared_ptr<Canvas> canvas, int color, bool undoable);
+    ColorCommand(std::shared_ptr<Canvas> canvas, int color, bool couldUndo);
     virtual std::shared_ptr<Command> New() override;
-    static std::shared_ptr<ColorCommand> New(std::shared_ptr<Canvas> canvas, int color, bool undoable);
+    static std::shared_ptr<ColorCommand> New(std::shared_ptr<Canvas> canvas, int color, bool couldUndo);
 private:
     int _gray;
     int _pre_gray;
 };
+
 
 class LineCommand : public Command {
 public:
@@ -101,11 +107,11 @@ private:
     Coordinate _begin, _end;
 };
 
+
 class TextCommand : public Command {
 public:
     virtual void Execute() override;
     virtual void Execute(Coordinate) override;
-
     TextCommand(std::shared_ptr<Canvas> canvas, Coordinate& offset, const std::string& text);
     virtual std::shared_ptr<Command> New() override;
     static std::shared_ptr<TextCommand> New(std::shared_ptr<Canvas> canvas, Coordinate& offset, const std::string& text);
@@ -113,6 +119,7 @@ private:
     Coordinate _offset;
     std::string _text;
 };
+
 
 class ShowCommand : public Command {
 public:
