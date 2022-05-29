@@ -1,203 +1,139 @@
-# Design Patterns Used in this Lab
+# 设计模式
 
-Here's 4 main design patterns used in this Lab:
+本次 Lab 中采用了如下几种设计模式
 
-## Composite
-**Composite** is used to build the `Command` abstract class, and its subclasses `LineCommand`, `TextCommand` and `ColorCommand`, `MacroCommand`, where `MacroCommand` includes a vector containing multiple `Command`s.
-<br />
+### 单例模式
 
+负责处理图像灰度级别的类 `Color` 采用单例模式，因为在程序的执行期间有且只应当有一个 `Color` 实例来负责全局灰度级别管理。
+
+`Color` 类的 UML 图如下所示：
 ```plantuml
 @startuml
-package command.h {
-    class Command
-    class LineCommand
-    class TextCommand
-    class ColorCommand
-    class MacroCommand
-}
-abstract class Command {
-    Execute()
-    Undo()
-    Redo()
-}
-
-class LineCommand extends Command {
-    Execute()
-}
-
-class TextCommand extends Command {
-    Execute()
-}
-
-class ColorCommand extends Command {
-    Execute()
-}
-
-class MacroCommand extends Command {
-    commands : vector<Command>
-    Execute()
-    Undo()
-    Redo()
-}
-
-MacroCommand "commands" o--* Command
-
-note left of MacroCommand::Execute()
-    for (command : commands) {
-        command->Execute();
+package color.h {
+    abstract class Color {
+        GetColor()
     }
-endnote
-note left of MacroCommand::Undo()
-    for (command : commands) {
-        command->Undo();
+    class _2Color extends Color {
+        {static} Instance() : _2Color
+        {static} _instance : _2Color
     }
-endnote
-note left of MacroCommand::Redo()
-    for (command : commands) {
-        command->Redo();
+    class _256Color extends Color {
+        {static} Instance() : _256Color
+        {static} _instance : _256Color
     }
-endnote
-
+}
 @enduml
 ```
-<br />
-<br />
-<br />
-<br />
 
-## Command
-**Command** is used to organize how the commands are invoked to apply to its receicer by the client. It also facilitates the Undo() and Redo() methods.
+### 状态模式
 
+在状态模式中，我们创建表示各种状态的对象和一个行为随着状态对象改变而改变的对象。我们采用状态模式设计画布类 `Canvas`，通过负责管理灰度级别的类 `Color` 来表示其恢复状态（黑白或者 256 灰度级别）：
+```plantuml
+@startuml
+package color.h {
+    abstract class Color {
+        GetColor()
+    }
+    class _2Color extends Color {
+        {static} Instance() : _2Color
+        {static} _instance : _2Color
+    }
+    class _256Color extends Color {
+        {static} Instance() : _256Color
+        {static} _instance : _256Color
+    }
+}
+package canvas.h {
+    class Canvas {
+        color : Color
+        GetColor()
+    }
+}
+Canvas "color scale" o--* Color
+@enduml
+```
+
+### 命令模式
+
+脚本中的不同指令采用命令模式进行设计，不同的指令被包裹在对象中，并传给调用对象 `invoker`。调用对象寻找可以处理该指令的合适的对象，并把该指令传给相应的对象执行:
 ```plantuml
 @startuml
 package command.h {
-    class Command
-    class LineCommand
-    class TextCommand
-    class ColorCommand
-    class MacroCommand
+    class LineCommand extends Command
+    class TextCommand extends Command
+    class ColorCommand extends Command
+    class MacroCommand extends Command
 }
 abstract class Command {
-    board : Board
+    _canvas : Coard
+    _couldUndo : Bool
     Execute()
     Undo()
     Redo()
 }
-
-class LineCommand extends Command {
+class LineCommand {
     Execute()
 }
-
-class TextCommand extends Command {
+class TextCommand {
     Execute()
 }
-
-class ColorCommand extends Command {
+class ColorCommand {
     Execute()
 }
-
-class MacroCommand extends Command {
+class MacroCommand {
     commands : vector<Command>
     Execute()
 }
-MacroCommand "commands" o--* Command
-
-package cmd_invoker.h {
-    class CommandInvoker
-}
-
-class CommandInvoker {
-    Execute()
+MacroCommand o--* Command
+package invoker.h {
+    class CommandInvoker {
+        Execute()
+    }
 }
 CommandInvoker  o--* Command
-
-package board.h {
-    class Board
+package canvas.h {
+    class Canvas
 }
-Board  "receiver" --* Command
-
-package draw.h {
+Canvas  "receiver" --* Command
+package draw.hpp {
     class Client
 }
 class Client
-Client --* Board
+Client --* Canvas
 Client ..> MacroCommand
 Client ..> TextCommand
 Client ..> LineCommand
 Client ..> ColorCommand
-
 @enduml
 ```
 
-<br />
-<br />
-<br />
-<br />
-<br />
-<br />
-<br />
-<br />
-<br />
-<br />
+### 组合模式
 
-## State
-**State** is used to help `Board` to switch between two gray scale modes according to the command line parameters, [-g 2] or [-g 256].
+组合模式用于把一组相似的对象当作一个单一的对象。组合模式依据树形结构来组合对象，用来表示部分以及整体层次。这种模式创建了一个包含自己对象组的类。该类提供了修改相同对象组的方式。我们在设计指令类 `Command` 时采用了组合模式，其中宏指令类 `MacroCommand` 中包括一个指令类的列表：
 ```plantuml
 @startuml
-package gray_scale.h {
-    class GrayScale
-    class BW2Scale
-    class BW256Scale
+package command.h {
+    abstract class Command {
+        _canvas : Coard
+        _couldUndo : Bool
+        Execute()
+        Undo()
+        Redo()
+    }
+    class LineCommand extends Command {
+        Execute()
+    }
+    class TextCommand extends Command {
+        Execute()
+    }
+    class ColorCommand extends Command {
+        Execute()
+    }
+    class MacroCommand extends Command {
+        commands : vector<Command>
+        Execute()
+    }
 }
-abstract class GrayScale {
-    GetColor()
-}
-
-class BW2Scale extends GrayScale {
-    GetColor()
-}
-
-class BW256Scale extends GrayScale {
-    GetColor()
-}
-
-package board.h {
-    class Board
-}
-class Board {
-    gscale : GrayScale
-    GetColor()
-}
-Board "gscale" o--* GrayScale
-
-note right of Board::GetColor()
-    gscale->GetColor()
-endnote
-
-@enduml
-```
-
-## Singleton
-**Singleton** is used because gray scale modes only need one instance each.
-
-```plantuml
-@startuml
-package gray_scale.h {
-    class BW2Scale
-    class BW256Scale
-}
-
-class BW2Scale {
-    {static} Instance() : GrayScale
-    {static} _instance : GrayScale
-}
-note right of BW2Scale::Instance()
-    return _instance
-endnote
-
-class BW256Scale {
-    {static} Instance() : GrayScale
-    {static} _instance : GrayScale
-}
+MacroCommand o--* Command
 @enduml
 ```
