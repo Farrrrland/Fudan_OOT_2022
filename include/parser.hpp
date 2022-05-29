@@ -122,9 +122,9 @@ std::shared_ptr<Command> CommandParser::GetCommand(std::string& cmd, std::shared
         Coordinate p = Coordinate(atoi(tokens[1].c_str()), atoi(tokens[2].c_str()));
         return TextCommand::New(canvas, p, tokens[3].substr(1, tokens[3].size() - 2));
     } else if (tokens[0] == "undo") {
-        return Command::New(CommandType::UNDO);
+        return Command::New(CommandTypeEnum::UNDO);
     } else if (tokens[0] == "redo") {
-        return Command::New(CommandType::REDO);
+        return Command::New(CommandTypeEnum::REDO);
     } else {
         Coordinate p = Coordinate(atoi(tokens[1].c_str()), atoi(tokens[2].c_str()));
         if (tokens[0][0] == '!') tokens[0] = tokens[0].substr(1, cmd.size() - 1);

@@ -1,14 +1,25 @@
-#ifndef _CHARSHAPE_H_
-#define _CHARSHAPE_H_
+/*
+@name: charshape.hpp
+@author: Farrrrland
+@created: 2022-05-25
+@modified: 2022-05-25
+*/
+
+#ifndef _CHARSHAPE_HPP_
+#define _CHARSHAPE_HPP_
 
 #include <vector>
 #include "asciis.h"
 
 std::vector<int> GetCharShape(char c) {
     std::vector<int> shape(8);
-    if (c < 32 || c > 128) return shape;
+    if (c < 32 || c > 128) {
+        return shape;
+    }
     c -= 32;
-    for (int i = 0; i < 8; i++) shape[i] = nAsciiDot[c * 8 + i];
+    for (int i = 0; i < 8; i++) {
+        shape[i] = nAsciiDot[c * 8 + i];
+    }
     return shape;
 }
 

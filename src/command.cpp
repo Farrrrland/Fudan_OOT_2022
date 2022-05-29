@@ -1,20 +1,29 @@
+/*
+@name: command.cpp
+@author: Farrrrland
+@created: 2022-05-25
+@modified: 2022-05-29
+*/
+
 #include <iostream>
 #include "command.h"
 #include "charshape.hpp"
 #include "invoker.h"
 
-//Command
+/*
+ Basic Command Class
+*/
 void Command::Execute(Coordinate) {
     Execute();
 }
 
 void Command::Undo() {
-    if (!_undoable || !_pre_canvas) exit(0);
+    if (!_undoable || !_previousCanvas) exit(0);
     SetExecuted(false);
-    *_canvas = *_pre_canvas;
+    *_canvas = *_previousCanvas;
 }
 
-bool Command::Undoable() {
+bool Command::CouldUndo() {
     return _undoable;
 }
 
@@ -22,7 +31,7 @@ void Command::SaveState() {
     if (_undoable) SetPreCanvas(std::make_shared<Canvas>(*_canvas));
 }
 
-std::shared_ptr<Command> Command::New(CommandType type) {
+std::shared_ptr<Command> Command::New(CommandTypeEnum type) {
     return std::make_shared<Command>(type);
 }
 
@@ -34,47 +43,91 @@ std::shared_ptr<Command> Command::Copy() {
     return Copy(Coordinate(0, 0));
 }
 
+/*
+ Macro Command
+*/
+MacroCommand::MacroCommand(std::shared_ptr<Canvas> canvas, const std::string& name, const Coordinate& offset, std::vector<std::shared_ptr<Command>>& commands) :
+    _offset(offset), _commands(commands) {
+    _type = CommandTypeEnum::MACRO;
+    _canvas = canvas;
+    _name = name;
+}
+
+std::shared_ptr<MacroCommand> MacroCommand::New(std::shared_ptr<Canvas> canvas, const std::string& name, const Coordinate& offset, std::vector<std::shared_ptr<Command>>& commands) {
+    return std::make_shared<MacroCommand>(canvas, name, offset, commands);
+}
+
+void MacroCommand::Execute() {
+    Execute(Coordinate(0, 0));
+}
+
+void MacroCommand::Execute(Coordinate offset) {
+    if (_executed) exit(0);
+    _executed = true;
+    
+    int gray = _canvas->GetGray();
+    for (auto command : _commands) {
+        command->Execute(_offset + offset);
+    }
+    ColorCommand::New(_canvas, gray, false)->Execute();
+}
+
+void MacroCommand::SetExecuted(bool executed) {
+    _executed = executed;
+    for (auto command : _commands) command->SetExecuted(executed);
+}
+
+std::shared_ptr<Command> MacroCommand::Copy() {
+    return Copy(_offset);
+}
+
+std::shared_ptr<Command> MacroCommand::Copy(const Coordinate& offset) {
+    std::vector<std::shared_ptr<Command>> new_cmds;
+    for (auto command : _commands) new_cmds.push_back(command->Copy());
+    return std::make_shared<MacroCommand>(_canvas, _name, offset, new_cmds);
+}
+
+void MacroCommand::SetOffset(const Coordinate& offset) {
+    _offset = offset;
+}
+
+
 std::shared_ptr<Command> Command::Copy(const Coordinate& offset) {
     std::shared_ptr<Command> new_cmd = this->New();
     _executed = false;
-    _pre_canvas = 0;
+    _previousCanvas = 0;
     return new_cmd;
 }
 
-// ShowCommand
-ShowCommand::ShowCommand(std::shared_ptr<Canvas> canvas) {
-    _type = CommandType::SHOW;
-    _undoable = false;
+/*
+ Color Command
+*/
+ColorCommand::ColorCommand(std::shared_ptr<Canvas> canvas, int gray, bool undoable) : _gray(gray) {
+    _type = CommandTypeEnum::COLOR;
     _canvas = canvas;
+    _undoable = undoable;
 }
 
-std::shared_ptr<Command> ShowCommand::New() {
-    return New(_canvas);
+std::shared_ptr<Command> ColorCommand::New() {
+    return New(_canvas, _gray, _undoable);
 }
 
-std::shared_ptr<ShowCommand> ShowCommand::New(std::shared_ptr<Canvas> canvas) {
-    return std::make_shared<ShowCommand>(canvas);
+std::shared_ptr<ColorCommand> ColorCommand::New(std::shared_ptr<Canvas> canvas, int gray, bool undoable) {
+    return std::make_shared<ColorCommand>(canvas, gray, undoable);
 }
 
-void ShowCommand::Execute() {
+void ColorCommand::Execute() {
     if (_executed) exit(0);
     _executed = true;
 
-    int size = _canvas->GetSize();
-    std::vector<std::vector<int>>* canvas = _canvas->GetCanvas();
-    for (int j = size - 1; j >= 0; j--) {
-        for (int i = 0; i < size; i++) {
-            if (i) std::cout << " ";
-            std::cout << (*canvas)[i][j];
-        }
-        std::cout << std::endl;
-    }
-    std::cout << std::endl;
+    _canvas->SetGray(_gray);
 }
 
-// LineCommand
+/*
+ Line Command
+*/
 LineCommand::LineCommand(std::shared_ptr<Canvas> canvas, Coordinate& begin, Coordinate& end) : _begin(begin), _end(end) {
-    _type = CommandType::LINE;
+    _type = CommandTypeEnum::LINE;
     _canvas = canvas;
 }
 
@@ -124,9 +177,11 @@ void LineCommand::Execute(Coordinate offset) {
     }
 }
 
-// TextCommand
+/*
+ Text Command
+*/
 TextCommand::TextCommand(std::shared_ptr<Canvas> canvas, Coordinate& offset, const std::string& text) : _offset(offset), _text(text) {
-    _type = CommandType::TEXT;
+    _type = CommandTypeEnum::TEXT;
     _canvas = canvas;
 }
 
@@ -158,70 +213,35 @@ void TextCommand::Execute(Coordinate offset) {
     }
 }
 
-// ColorCommand
-ColorCommand::ColorCommand(std::shared_ptr<Canvas> canvas, int gray, bool undoable) : _gray(gray) {
-    _type = CommandType::COLOR;
+/*
+ Show Command
+*/
+ShowCommand::ShowCommand(std::shared_ptr<Canvas> canvas) {
+    _type = CommandTypeEnum::SHOW;
+    _undoable = false;
     _canvas = canvas;
-    _undoable = undoable;
 }
 
-std::shared_ptr<Command> ColorCommand::New() {
-    return New(_canvas, _gray, _undoable);
+std::shared_ptr<Command> ShowCommand::New() {
+    return New(_canvas);
 }
 
-std::shared_ptr<ColorCommand> ColorCommand::New(std::shared_ptr<Canvas> canvas, int gray, bool undoable) {
-    return std::make_shared<ColorCommand>(canvas, gray, undoable);
+std::shared_ptr<ShowCommand> ShowCommand::New(std::shared_ptr<Canvas> canvas) {
+    return std::make_shared<ShowCommand>(canvas);
 }
 
-void ColorCommand::Execute() {
+void ShowCommand::Execute() {
     if (_executed) exit(0);
     _executed = true;
 
-    _canvas->SetGray(_gray);
-}
-
-// MacroCommand
-MacroCommand::MacroCommand(std::shared_ptr<Canvas> canvas, const std::string& name, const Coordinate& offset, std::vector<std::shared_ptr<Command>>& commands) :
-    _offset(offset), _commands(commands) {
-    _type = CommandType::MACRO;
-    _canvas = canvas;
-    _name = name;
-}
-
-std::shared_ptr<MacroCommand> MacroCommand::New(std::shared_ptr<Canvas> canvas, const std::string& name, const Coordinate& offset, std::vector<std::shared_ptr<Command>>& commands) {
-    return std::make_shared<MacroCommand>(canvas, name, offset, commands);
-}
-
-void MacroCommand::Execute() {
-    Execute(Coordinate(0, 0));
-}
-
-void MacroCommand::Execute(Coordinate offset) {
-    if (_executed) exit(0);
-    _executed = true;
-    
-    int gray = _canvas->GetGray();
-    for (auto command : _commands) {
-        command->Execute(_offset + offset);
+    int size = _canvas->GetSize();
+    std::vector<std::vector<int>>* canvas = _canvas->GetCanvas();
+    for (int j = size - 1; j >= 0; j--) {
+        for (int i = 0; i < size; i++) {
+            if (i) std::cout << " ";
+            std::cout << (*canvas)[i][j];
+        }
+        std::cout << std::endl;
     }
-    ColorCommand::New(_canvas, gray, false)->Execute();
-}
-
-void MacroCommand::SetExecuted(bool executed) {
-    _executed = executed;
-    for (auto command : _commands) command->SetExecuted(executed);
-}
-
-std::shared_ptr<Command> MacroCommand::Copy() {
-    return Copy(_offset);
-}
-
-std::shared_ptr<Command> MacroCommand::Copy(const Coordinate& offset) {
-    std::vector<std::shared_ptr<Command>> new_cmds;
-    for (auto command : _commands) new_cmds.push_back(command->Copy());
-    return std::make_shared<MacroCommand>(_canvas, _name, offset, new_cmds);
-}
-
-void MacroCommand::SetOffset(const Coordinate& offset) {
-    _offset = offset;
+    std::cout << std::endl;
 }

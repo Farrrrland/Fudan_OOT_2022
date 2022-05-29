@@ -3,14 +3,14 @@
 
 void CommandInvoker::Execute(std::vector<std::shared_ptr<Command>> cmds) {
     for (auto cmd : cmds) {
-        CommandType type = cmd->GetType();
+        CommandTypeEnum type = cmd->GetType();
         if (type == MACRO) {
             std::cout << "Execute Macro Command: " + std::dynamic_pointer_cast<MacroCommand>(cmd)->GetName() << std::endl;
             Execute(cmd);
-        } else if (type == CommandType::UNDO) {
+        } else if (type == CommandTypeEnum::UNDO) {
             std::cout << "Execute Undo Command" << std::endl;
             Undo();
-        } else if (type == CommandType::REDO) {
+        } else if (type == CommandTypeEnum::REDO) {
             std::cout << "Execute Redo Command" << std::endl;
             Redo();
         } else {
@@ -18,7 +18,7 @@ void CommandInvoker::Execute(std::vector<std::shared_ptr<Command>> cmds) {
             Execute(cmd);
         }
 
-        if (type == CommandType::COLOR) {
+        if (type == CommandTypeEnum::COLOR) {
             std::cout << std::endl;
         } else {
             Execute(ShowCommand::New(_canvas));
@@ -27,9 +27,9 @@ void CommandInvoker::Execute(std::vector<std::shared_ptr<Command>> cmds) {
 }
 
 void CommandInvoker::Execute(std::shared_ptr<Command> command) {
-    if (command->Undoable()) command->SaveState();
+    if (command->CouldUndo()) command->SaveState();
     command->Execute();
-    if (command->Undoable()) {
+    if (command->CouldUndo()) {
         while (!_redo_stack.empty()) _redo_stack.pop();
         _undo_stack.push(command);
     }
