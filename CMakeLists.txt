@@ -11,7 +11,7 @@ include_directories(include)
 
 file(GLOB SOURCES "src/*.cpp")
 
-add_executable(draw ${SOURCES} main.cpp)
+add_executable(main ${SOURCES} main.cpp)
 add_executable(autotest ${SOURCES} test/test.cpp)
 
 add_test(NAME manual COMMAND autotest WORKING_DIRECTORY ../test/manual)

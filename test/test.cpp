@@ -64,7 +64,7 @@ int main() {
         // configure params and temp file to store middle results
         string tmp_file = "tmp.txt";
         FILE* tmp = freopen(tmp_file.c_str(), "w", stdout);
-        const char* cmd[4] = {"draw", "-g", to_string(color).c_str(), input.c_str()};
+        const char* cmd[4] = {"main", "-g", to_string(color).c_str(), input.c_str()};
         run(4, (char**)cmd);
         fclose(tmp);
         // compare with standard
