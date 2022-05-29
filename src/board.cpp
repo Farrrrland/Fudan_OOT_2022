@@ -1,8 +1,8 @@
 #include "board.h"
 
-Board::Board(int n, int gscale) : _canvas(n), _size(n) {
-    if (gscale == 2) _gscale = BW2Scale::Instance();
-    else if (gscale == 256) _gscale = BW256Scale::Instance();
+Board::Board(int n, int color) : _canvas(n), _size(n) {
+    if (color == 2) _color = _2Color::Instance();
+    else if (color == 256) _color = _256Color::Instance();
 }
 
 int Board::GetSize() {
@@ -22,7 +22,7 @@ void Board::SetGray(int gray) {
 }
 
 int Board::GetColor() {
-    return _gscale->GetColor(_gray);
+    return _color->GetColor(_gray);
 }
 
 bool Board::Plot(Coordinate coor) {

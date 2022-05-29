@@ -1,7 +1,7 @@
 #include <iostream>
 #include "command.h"
 #include "char_lib.h"
-#include "cmd_invoker.h"
+#include "invoker.h"
 
 //Command
 void Command::Execute(Coordinate) {

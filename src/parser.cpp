@@ -1,7 +1,7 @@
 #include <map>
 #include <algorithm>
 #include "command.h"
-#include "cmd_parser.h"
+#include "parser.h"
 
 #include <iostream>
 

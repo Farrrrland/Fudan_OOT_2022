@@ -1,5 +1,5 @@
-#ifndef _CMD_INVOKER_H_
-#define _CMD_INVOKER_H_
+#ifndef _INVOKER_H_
+#define _INVOKER_H_
 
 #include <stack>
 #include "command.h"

@@ -3,12 +3,12 @@
 
 #include <memory>
 #include "canvas.h"
-#include "gray_scale.h"
+#include "color.h"
 #include "coordinate.h"
 
 class Board {
 public:
-    Board(int n, int gscale);
+    Board(int n, int color);
 
     int GetSize();
     std::vector<std::vector<int>>* GetCanvas();
@@ -22,7 +22,7 @@ private:
     int _size;
 
     int _gray = 0;
-    std::shared_ptr<GrayScale> _gscale;
+    std::shared_ptr<Color> _color;
 };
 
 #endif
