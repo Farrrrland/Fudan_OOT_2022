@@ -4,4 +4,4 @@ build/*
 !build/autotest.exe
 !build/draw
 !build/autotest
-*.log
+*.failure

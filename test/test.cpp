@@ -9,49 +9,82 @@
 #include <algorithm>
 using namespace std;
 
-void getFileNames(string path, vector<string>& files);
-bool endWith(const string&, const string&);
+bool endsWith(const string& str, const string& end) {
+    int n = str.length();
+    int m = end.length();
+    if (n < m) {
+        return false;
+    }
+    for (int i = 0; i < m; i++) {
+        if (str[n - m + i] != end[i]) {
+            return false;
+        }
+    }
+    return true;
+}
+
+void getFiles(string path, vector<string>& filenames) {
+    DIR* directory;
+    struct dirent* ptr;
+    if (!(directory = opendir(path.c_str()))) {
+        cout << "Folder doesn't Exist!"<<endl;
+        return;
+    }
+    while ((ptr = readdir(directory)) != 0) {
+        if (strcmp(ptr->d_name, ".") != 0 && strcmp(ptr->d_name, "..") != 0) {
+            filenames.push_back(path + "/" + ptr->d_name);
+        }
+    }
+    closedir(directory);
+}
 
 int main() {
     vector<string> files;
-    getFileNames(".", files);
-
+    getFiles(".", files);
     sort(files.begin(), files.end());
     for (int i = 0, size = files.size() - 1; i < size; i++) {
-        // Check Test Files
-        string in_file = files[i];
-        string out_file = files[i + 1];
-        int n = in_file.size(), m = out_file.size();
-        if (!endWith(in_file, ".txt") || !endWith(out_file, ".txt")) continue;
-        if (!endWith(out_file.substr(0, m - 4), "_result")) continue;
-        if (in_file.substr(0, n - 4) != out_file.substr(0, m - 11)) continue;
-        int gray = 0;
-        if (endWith(in_file.substr(0, n - 4), "-g2")) gray = 2;
-        else if (endWith(in_file.substr(0, n - 4), "-g256")) gray = 256;
-        else continue;
-        
-        // Set Parameters
-        string cmp_file = "tmp.txt";
-        FILE* tmp = freopen(cmp_file.c_str(), "w", stdout);
-        int argc = 4;
-        const char* argv[4] = {"draw", "-g", to_string(gray).c_str(), in_file.c_str()};
-        run(argc, (char**)argv);
+        string input = files[i];
+        string output = files[i + 1];
+        int n = input.size(), m = output.size();
+        // validate test files 
+        if ((!endsWith(input, ".txt") || !endsWith(output, ".txt"))
+           ||(!endsWith(output.substr(0, m - 4), "_result"))
+           ||(input.substr(0, n - 4) != output.substr(0, m - 11))) {
+            continue;
+        }
+        // configure colors
+        int color = 0;
+        if (endsWith(input.substr(0, n - 4), "-g2")) {
+            color = 2;
+        } else if (endsWith(input.substr(0, n - 4), "-g256")) {
+            color = 256;
+        } else {
+            continue;
+        }
+        // configure params and temp file to store middle results
+        string tmp_file = "tmp.txt";
+        FILE* tmp = freopen(tmp_file.c_str(), "w", stdout);
+        const char* cmd[4] = {"draw", "-g", to_string(color).c_str(), input.c_str()};
+        run(4, (char**)cmd);
         fclose(tmp);
-
-        // Compare Results
-        ifstream op;
+        // compare with standard
+        ifstream outputStream;
         string str1, str2;
-        op.open(out_file);
-        while(!op.eof()) str1 += op.get();
-        op.close();
-        op.open(cmp_file);
-        while(!op.eof()) str2 += op.get();
-        op.close();
-        remove(cmp_file.c_str());
+        outputStream.open(output);
+        while(!outputStream.eof()) {
+            str1 += outputStream.get();
+        }
+        outputStream.close();
+        outputStream.open(tmp_file);
+        while(!outputStream.eof()) {
+            str2 += outputStream.get();
+        }
+        outputStream.close();
+        remove(tmp_file.c_str());
         if (str1 != str2) {
-            FILE* fail_file = freopen("fail.log", "w", stdout);
-            cout << argv[0] << " "  << argv[1] << " " << argv[2] << " " << argv[3] << " " << endl;
-            cout << "------- Your Output of " << in_file <<" -------" << endl;
+            FILE* fail_file = freopen("test.failure", "w", stdout);
+            cout << cmd[0] << " "  << cmd[1] << " " << cmd[2] << " " << cmd[3] << " " << endl;
+            cout << "------- Wrong Output of " << input <<" -------" << endl;
             cout << str2 << endl;
             cout << "------- Standard Output -------" << endl;
             cout << str1 << endl;
@@ -59,32 +92,7 @@ int main() {
             return 0;
         }
     }
-
     fclose(stdout);
     fprintf(stderr, "OK");
     return 0;
-}
-
-bool endWith(const string& str, const string& end) {
-    int n = str.length(), m = end.length();
-    if (n < m) return false;
-    for (int i = 0; i < m; i++) {
-        if (str[n - m + i] != end[i]) return false;
-    }
-    return true;
-}
-
-void getFileNames(string path, vector<string>& filenames) {
-    DIR* pDir;
-    struct dirent* ptr;
-    if (!(pDir = opendir(path.c_str()))) {
-        cout << "Folder doesn't Exist!"<<endl;
-        return;
-    }
-    while ((ptr = readdir(pDir)) != 0) {
-        if (strcmp(ptr->d_name, ".") != 0 && strcmp(ptr->d_name, "..") != 0) {
-            filenames.push_back(path + "/" + ptr->d_name);
-        }
-    }
-    closedir(pDir);
 }
