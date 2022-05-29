@@ -1,0 +1,11 @@
+make --dry-run --always-make --keep-going --print-directory
+make: Entering directory `/home/ec2-user/Fudan_OOT_2022'
+ 
+g++  -o src/test.o -c src/test.cpp
+ 
+g++  -o src/canvas.o -c src/canvas.cpp
+ 
+g++  ./src/test.o ./src/canvas.o -o test
+ 
+make: Leaving directory `/home/ec2-user/Fudan_OOT_2022'
+ 

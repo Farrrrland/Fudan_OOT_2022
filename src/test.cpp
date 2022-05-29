@@ -1,69 +1,35 @@
+#include <memory>
+#include <vector>
+#include <string>
 #include <iostream>
+#include "../include/canvas.h"
+#include "../include/coordinate.h"
 using namespace std;
-/********************Printer Example*****************************/
-class Printer
+int main(int argc, char*argv[])
 {
-public:
-	static void printText(string s) { cout << s << endl; count++; }
-	static Printer* getInstance()
-	{
-		return singlePrinter;
-	}
-	static int getUseTimes()
-	{
-		return count;
-	}
-
-private:
-	static int count;
-	static Printer* singlePrinter;
-	Printer() {}
-	Printer(const Printer& p) {}
-};
-
-Printer* Printer::singlePrinter = new Printer;
-
-/**********************ChairMan Example*******************************/
-class ChairMan
-{
-private:
-	static ChairMan* singleMan;
-	ChairMan() 
-	{
-		cout << "ChairMan" << endl;
-	}
-
-	ChairMan(const ChairMan& c)
-	{
-	}
-
-public:
-
-	static	ChairMan* getInstance()
-	{
-		return singleMan;
-	}
-	 
-};
-
-ChairMan* ChairMan::singleMan = new ChairMan;
-int Printer::count = 0;
-void test()
-{
-	ChairMan* cm1 = ChairMan::getInstance();
-	ChairMan* cm2 = ChairMan::getInstance();
-	if (cm1 == cm2)
-	{
-		cout << "CM1 == CM2" << endl;
-	}
-
-	Printer* p1 = Printer::getInstance();
-	p1->printText("HAHAHAHAAHAH");
-}
-int main()
-{
-	cout << "Main" << endl;
-	test();
-    system("pause");
-    return 0;
+	Canvas *object = Canvas::getInstance();
+    cout << object << endl;
+    vector<vector<int>> res = object->getData();
+    for (const auto & v : res) {
+        for (const auto & i : v) {
+            cout << i << " ";
+        }
+        cout << endl;
+    }
+    Coordinate coor = Coordinate(0, 0);
+    object->setData(coor, 5);
+    // cout << ptr << " " << *ptr << endl;
+    cout << endl;
+    Canvas *obj2 = Canvas::getInstance();
+    // cout << ptr << " " << *ptr << endl;
+    cout << obj2 << endl;
+    vector<vector<int>> res2 = object->getData();
+    for (const auto & v : res2) {
+        for (const auto & i : v) {
+            cout << i << " ";
+        }
+        cout << endl;
+    }
+    // cout << ptr << " " << *ptr << endl;
+	return 0;
 }
