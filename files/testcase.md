@@ -6,10 +6,10 @@ color(1)
 line(1, 2, 48, 47)
 text(10, 5, "OOAD")
 color(0)
-test(5, 45, "Bounday")
+text(5, 45, "Bounday")
 undo
 undo
-test(5, 45, "Bounday")
+text(5, 45, "Bounday")
 undo
 redo
 ```

@@ -1,8 +1,5 @@
-#include "../include/canvas.h"
+#include "canvas.h"
 
-void Canvas::setData(Coordinate coor, int val) {
-    _canvas[coor.x()][coor.y()] = val;
-}
-std::vector<std::vector<int>> Canvas::getData() {
-    return _canvas;
+std::vector<std::vector<int>>* Canvas::Get() {
+    return &_canvas;
 }

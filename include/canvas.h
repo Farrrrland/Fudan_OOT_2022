@@ -1,28 +1,19 @@
-// Singleton Mode Canvas
 #ifndef _CANVAS_H_
 #define _CANVAS_H_
 
+#include <memory>
 #include <vector>
-#include <iostream>
 #include "coordinate.h"
- 
+
 class Canvas {
 public:
-	static Canvas* getInstance() {
-        static Canvas canvas;
-        if (canvas._canvas.empty()) {
-            canvas._canvas = std::vector<std::vector<int>>(_length, std::vector<int>(_width, 0));
-        }
-        return &canvas;
+    std::vector<std::vector<int>>* Get();
+    void Set(Coordinate coor, int color) {
+        _canvas[coor.x()][coor.y()] = color;
     }
-    void setData(Coordinate coor, int val);
-    std::vector<std::vector<int>> getData();
+    
+    Canvas(int n) : _canvas(n, std::vector<int>(n, 0)) {}
 private:
-	Canvas(){};
-	Canvas(const Canvas&);
-	Canvas& operator==(const Canvas&);
-    static const int _length = 5;
-    static const int _width = 5;
     std::vector<std::vector<int>> _canvas;
 };
 
