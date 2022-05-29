@@ -21,7 +21,7 @@ void CommandInvoker::Execute(std::vector<std::shared_ptr<Command>> cmds) {
         if (type == CommandType::COLOR) {
             std::cout << std::endl;
         } else {
-            Execute(ShowCommand::New(_board));
+            Execute(ShowCommand::New(_canvas));
         }
     }
 }

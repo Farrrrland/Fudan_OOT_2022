@@ -57,7 +57,7 @@ std::vector<std::string> TrimCommand(const std::string& cmd) {
     return res;
 }
 
-std::vector<std::shared_ptr<Command>> CommandParser::ParseCommands(std::shared_ptr<Board> board, std::string& str) {
+std::vector<std::shared_ptr<Command>> CommandParser::ParseCommands(std::shared_ptr<Canvas> canvas, std::string& str) {
     std::vector<std::shared_ptr<Command>> res;
 
     // Remove whitespaces
@@ -67,9 +67,9 @@ std::vector<std::shared_ptr<Command>> CommandParser::ParseCommands(std::shared_p
     
     for (std::string cmd : cmds) {
         if (cmd[0] == '#') {
-            RegisterMacroCommand(cmd, board);
+            RegisterMacroCommand(cmd, canvas);
         } else {
-            std::shared_ptr<Command> command = GetCommand(cmd, board);
+            std::shared_ptr<Command> command = GetCommand(cmd, canvas);
             command->SetInfo(cmd);
             res.push_back(command);
         }
@@ -78,7 +78,7 @@ std::vector<std::shared_ptr<Command>> CommandParser::ParseCommands(std::shared_p
     return res;
 }
 
-void CommandParser::RegisterMacroCommand(std::string& cmd, std::shared_ptr<Board> board) {
+void CommandParser::RegisterMacroCommand(std::string& cmd, std::shared_ptr<Canvas> canvas) {
     int len = cmd.length();
     int l, r;
     for (int i = 1; i < len; i++) {
@@ -88,27 +88,27 @@ void CommandParser::RegisterMacroCommand(std::string& cmd, std::shared_ptr<Board
     std::vector<std::string> strs = SplitCommand(cmd.substr(l + 1, r - l - 1));
     std::vector<std::shared_ptr<Command>> cmds;
     for (std::string str : strs) {
-        cmds.push_back(GetCommand(str, board));
+        cmds.push_back(GetCommand(str, canvas));
     }
     std::string name = cmd.substr(1, l - 1); 
-    _macro_table[name] = MacroCommand::New(board, name, Coordinate(0, 0), cmds);
+    _macro_table[name] = MacroCommand::New(canvas, name, Coordinate(0, 0), cmds);
 }
 
 std::shared_ptr<Command> CommandParser::GetMacroCommand(std::string& cmd, const Coordinate& offset) {
     return _macro_table[cmd]->Copy(offset);
 }
 
-std::shared_ptr<Command> CommandParser::GetCommand(std::string& cmd, std::shared_ptr<Board> board) {
+std::shared_ptr<Command> CommandParser::GetCommand(std::string& cmd, std::shared_ptr<Canvas> canvas) {
     std::vector<std::string> tokens = TrimCommand(cmd);
     if (tokens[0] == "color") {
-        return ColorCommand::New(board, atoi(tokens[1].c_str()), true);
+        return ColorCommand::New(canvas, atoi(tokens[1].c_str()), true);
     } else if (tokens[0] == "line") {
         Coordinate p1 = Coordinate(atoi(tokens[1].c_str()), atoi(tokens[2].c_str()));
         Coordinate p2 = Coordinate(atoi(tokens[3].c_str()), atoi(tokens[4].c_str()));
-        return LineCommand::New(board, p1, p2);
+        return LineCommand::New(canvas, p1, p2);
     } else if (tokens[0] == "text") {
         Coordinate p = Coordinate(atoi(tokens[1].c_str()), atoi(tokens[2].c_str()));
-        return TextCommand::New(board, p, tokens[3].substr(1, tokens[3].size() - 2));
+        return TextCommand::New(canvas, p, tokens[3].substr(1, tokens[3].size() - 2));
     } else if (tokens[0] == "undo") {
         return Command::New(CommandType::UNDO);
     } else if (tokens[0] == "redo") {

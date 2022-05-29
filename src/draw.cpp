@@ -1,6 +1,6 @@
 #include <fstream>
 #include <iostream>
-#include "board.h"
+#include "canvas.h"
 #include "draw.h"
 #include "command.h"
 #include "parser.h"
@@ -23,7 +23,7 @@ void run(int argc, char** argv) {
         return; 
     }
 
-    std::shared_ptr<Board> board = std::make_shared<Board>(50, gscale);
+    std::shared_ptr<Canvas> canvas = std::make_shared<Canvas>(50, gscale);
     std::string script;
     std::string line;
     std::fstream fin(file_name);
@@ -35,7 +35,7 @@ void run(int argc, char** argv) {
     }
 
     CommandParser parser;
-    std::vector<std::shared_ptr<Command>> cmds = parser.ParseCommands(board, script);
-    CommandInvoker invoker(board);
+    std::vector<std::shared_ptr<Command>> cmds = parser.ParseCommands(canvas, script);
+    CommandInvoker invoker(canvas);
     invoker.Execute(cmds);
 }

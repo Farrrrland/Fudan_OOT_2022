@@ -3,18 +3,27 @@
 
 #include <memory>
 #include <vector>
+#include "color.h"
 #include "coordinate.h"
 
 class Canvas {
 public:
-    std::vector<std::vector<int>>* Get();
-    void Set(Coordinate coor, int color) {
+    Canvas(int n, int color);
+
+    int GetSize();
+    std::vector<std::vector<int>>* GetCanvas();
+    void SetCanvas(Coordinate coor, int color) {
         _canvas[coor.x()][coor.y()] = color;
     }
-    
-    Canvas(int n) : _canvas(n, std::vector<int>(n, 0)) {}
+    int GetGray();
+    void SetGray(int gray);
+    int GetColor();
+    bool Plot(Coordinate coor);
 private:
     std::vector<std::vector<int>> _canvas;
+    int _size;
+    int _gray = 0;
+    std::shared_ptr<Color> _color;
 };
 
 #endif

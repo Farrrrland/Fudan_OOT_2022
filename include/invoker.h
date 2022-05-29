@@ -11,11 +11,11 @@ public:
     void Undo();
     void Redo();
     
-    CommandInvoker(std::shared_ptr<Board> board) : _board(board) {}
+    CommandInvoker(std::shared_ptr<Canvas> canvas) : _canvas(canvas) {}
 private:
     std::stack<std::shared_ptr<Command>> _undo_stack;
     std::stack<std::shared_ptr<Command>> _redo_stack;
-    std::shared_ptr<Board> _board;
+    std::shared_ptr<Canvas> _canvas;
 };
 
 #endif
