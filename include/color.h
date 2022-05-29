@@ -1,7 +1,7 @@
 /*
 @name: color.h
 @author: Farrrrland
-@created: 2022-05-25
+@created: 2022-05-22
 @modified: 2022-05-29
 */
 

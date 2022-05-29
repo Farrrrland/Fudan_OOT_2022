@@ -1,3 +1,10 @@
+/*
+@name:draw.hpp
+@author: Farrrrland
+@created: 2022-05-22
+@modified: 2022-05-29
+*/
+
 #ifndef _DRAW_HPP_
 #define _DRAW_HPP_
 
@@ -24,18 +31,15 @@ void run(int argc, char** argv) {
         std::cout << "ERROR: Paratetor " << argv[1] << " Not Defined" << std::endl;
         return; 
     }
-
     std::shared_ptr<Canvas> canvas = std::make_shared<Canvas>(50, gscale);
     std::string script;
     std::string line;
     std::fstream fin(file_name);
-
     while (getline(fin, line)) {
         if (line.length() < 2 || line[0] != '/' || line[1] != '/') {
             script += line;
         }
     }
-
     CommandParser parser;
     std::vector<std::shared_ptr<Command>> cmds = parser.ParseCommands(canvas, script);
     CommandInvoker invoker(canvas);
